@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload PDF</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      max-width: 400px;
+    }
+    input, button {
+      margin-top: 1rem;
+      padding: 0.5rem;
+    }
+    #responseMsg {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Upload a PDF Book</h1>
+  <form id="uploadForm">
+    <input type="text" name="description" placeholder="Enter PDF Title" required />
+    <input type="file" name="file" accept="application/pdf" required />
+    <button type="submit">Upload</button>
+  </form>
+  <p id="responseMsg"></p>
+
+  <!-- ✅ Final working JavaScript goes below -->
+  <script>
+    const UPLOAD_API_URL = "https://script.google.com/macros/s/AKfycbzwTDUbzfuInO33rPEapcZlFMHwKF2UuieXrn570n7lQtg1ywwGouhzqmfcFhea-AADuw/exec";
+
+    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const title = document.querySelector("input[name='description']").value;
+      const file = document.querySelector("input[name='file']").files[0];
+
+      if (!file || file.type !== "application/pdf") {
+        alert("Please select a valid PDF file.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async function () {
+        const base64File = reader.result.split(",")[1];
+
+        try {
+          const response = await fetch(UPLOAD_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              file: base64File,
+              filename: file.name,
+              description: title,
+            })
+          });
+
+          const result = await response.text();
+          document.getElementById("responseMsg").innerHTML =
+            result.startsWith("https://")
+              ? `✅ Uploaded! <a href="${result}" target="_blank">View PDF</a>`
+              : `❌ ${result}`;
+        } catch (err) {
+          document.getElementById("responseMsg").innerText = "Error: " + err.message;
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
