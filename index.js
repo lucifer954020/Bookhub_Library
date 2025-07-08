@@ -64,3 +64,40 @@ sortSelect.addEventListener("change", () => {
 });
 
 window.onload = loadBooks;
+let adminToken = null;
+
+function checkAdminAccess() {
+  const isAdmin = confirm("Are you an admin? Click OK to enter token.");
+  if (isAdmin) {
+    const token = prompt("Enter admin delete token:");
+    if (token) {
+      adminToken = token;
+      document.querySelectorAll(".delete-btn").forEach(btn => btn.classList.remove("hidden"));
+    }
+  }
+}
+
+async function handleDelete(title, fileUrl, cardElement) {
+  if (!adminToken) return alert("Admin token not set.");
+
+  const confirmDelete = confirm(`Are you sure you want to delete "${title}"?`);
+  if (!confirmDelete) return;
+
+  const response = await fetch("https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec?method=delete", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      token: adminToken,
+      fileUrl: fileUrl,
+      title: title
+    })
+  });
+
+  const result = await response.text();
+  if (result === "DELETED") {
+    alert("✅ Deleted successfully.");
+    cardElement.remove();
+  } else {
+    alert("❌ Failed: " + result);
+  }
+}
