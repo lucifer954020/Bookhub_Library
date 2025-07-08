@@ -1,6 +1,7 @@
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzwTDUbzfuInO33rPEapcZlFMHwKF2UuieXrn570n7lQtg1ywwGouhzqmfcFhea-AADuw/exec";
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
 
 let books = [];
+let adminToken = null;
 
 async function loadBooks() {
   try {
@@ -18,7 +19,7 @@ function displayBooks(bookList) {
   container.innerHTML = "";
 
   bookList.forEach(book => {
-    const fileId = book.link.match(/[-\\w]{25,}/)?.[0];
+    const fileId = book.link.match(/[-\w]{25,}/)?.[0];
     const downloadLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
     const card = document.createElement("div");
@@ -41,38 +42,15 @@ function displayBooks(bookList) {
   checkAdminAccess();
 }
 
-
-const searchInput = document.getElementById("searchInput");
-searchInput.addEventListener("input", () => {
-  const keyword = searchInput.value.toLowerCase();
-  const filtered = books.filter(b => b.title.toLowerCase().includes(keyword));
-  displayBooks(filtered);
-});
-
-const sortSelect = document.getElementById("sortBy");
-sortSelect.addEventListener("change", () => {
-  const sorted = [...books];
-  const sortBy = sortSelect.value;
-  if (sortBy === "name") {
-    sorted.sort((a, b) => a.title.localeCompare(b.title));
-  } else if (sortBy === "recent") {
-    sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
-  } else if (sortBy === "size") {
-    sorted.sort((a, b) => parseFloat(b.size) - parseFloat(a.size));
-  }
-  displayBooks(sorted);
-});
-
-window.onload = loadBooks;
-let adminToken = null;
-
 function checkAdminAccess() {
   const isAdmin = confirm("Are you an admin? Click OK to enter token.");
   if (isAdmin) {
     const token = prompt("Enter admin delete token:");
-    if (token) {
+    if (token === "Pawan123@") {
       adminToken = token;
       document.querySelectorAll(".delete-btn").forEach(btn => btn.classList.remove("hidden"));
+    } else {
+      alert("❌ Invalid token.");
     }
   }
 }
@@ -101,3 +79,24 @@ async function handleDelete(title, fileUrl, cardElement) {
     alert("❌ Failed: " + result);
   }
 }
+
+document.getElementById("searchInput").addEventListener("input", () => {
+  const keyword = searchInput.value.toLowerCase();
+  const filtered = books.filter(b => b.title.toLowerCase().includes(keyword));
+  displayBooks(filtered);
+});
+
+document.getElementById("sortBy").addEventListener("change", () => {
+  const sorted = [...books];
+  const sortBy = sortSelect.value;
+  if (sortBy === "name") {
+    sorted.sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sortBy === "recent") {
+    sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+  } else if (sortBy === "size") {
+    sorted.sort((a, b) => parseFloat(b.size) - parseFloat(a.size));
+  }
+  displayBooks(sorted);
+});
+
+window.onload = loadBooks;
