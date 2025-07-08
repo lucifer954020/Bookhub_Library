@@ -18,20 +18,29 @@ function displayBooks(bookList) {
   container.innerHTML = "";
 
   bookList.forEach(book => {
-    const fileId = book.link.match(/[-\w]{25,}/)?.[0];
+    const fileId = book.link.match(/[-\\w]{25,}/)?.[0];
     const downloadLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
 
     const card = document.createElement("div");
     card.className = "bg-white shadow-md p-4 rounded-lg flex flex-col justify-between";
+
     card.innerHTML = `
       <h3 class="text-xl font-semibold mb-2">${book.title}</h3>
       <p class="text-gray-500 text-sm mb-1">Size: ${book.size} MB</p>
       <p class="text-gray-500 text-sm mb-3">Uploaded: ${new Date(book.date).toLocaleDateString()}</p>
       <a href="${downloadLink}" target="_blank" class="mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center">Download</a>
+      <button class="delete-btn mt-2 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 hidden">Delete</button>
     `;
+
+    const deleteBtn = card.querySelector(".delete-btn");
+    deleteBtn.addEventListener("click", () => handleDelete(book.title, book.link, card));
+
     container.appendChild(card);
   });
+
+  checkAdminAccess();
 }
+
 
 const searchInput = document.getElementById("searchInput");
 searchInput.addEventListener("input", () => {
