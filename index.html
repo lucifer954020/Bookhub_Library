@@ -1,48 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <title>📚 FreeBookHub - Home</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📚 FreeBookHub</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="index.js" defer></script>
 </head>
-<body class="bg-gray-100 text-gray-900 transition-colors duration-300">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300">
 
-  <!-- 🌙 Dark Mode Toggle -->
-  <div class="fixed top-4 right-4 z-10">
-    <label class="flex items-center space-x-2 text-sm cursor-pointer">
-      <input type="checkbox" id="darkToggle" class="hidden">
-      <span class="inline-block w-10 h-5 bg-gray-300 rounded-full relative">
-        <span id="toggleCircle" class="absolute left-0 top-0 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"></span>
-      </span>
-      <span>🌙 Dark Mode</span>
-    </label>
-  </div>
-
-  <header class="bg-blue-600 text-white p-5 text-center shadow">
-    <h1 class="text-3xl font-bold">📚 FreeBookHub</h1>
-    <p class="text-sm">Your private PDF library. Admins can manage. Visitors can download freely.</p>
-    <div id="visitCount" class="mt-2 text-sm opacity-80"></div>
+  <!-- Navbar -->
+  <header class="bg-blue-600 dark:bg-blue-800 text-white px-6 py-4 flex justify-between items-center shadow">
+    <div class="text-xl font-bold">📚 FreeBookHub</div>
+    <nav class="space-x-4 text-sm">
+      <a href="index.html" class="hover:underline">🏠 Home</a>
+      <a href="upload.html" class="hover:underline">📤 Upload</a>
+      <a href="filter.html" class="hover:underline">🔍 Filter</a>
+      <button onclick="toggleDarkMode()" class="bg-gray-800 px-2 py-1 rounded text-xs">🌓 Toggle Theme</button>
+    </nav>
   </header>
 
-  <main class="p-6 max-w-5xl mx-auto">
-    <!-- PDF Section -->
+  <!-- Main content -->
+  <main class="p-6 max-w-6xl mx-auto">
+
+    <!-- Visit Counter -->
+    <div id="visitCount" class="mb-4 text-sm text-gray-700 dark:text-gray-300">👁 Loading visits...</div>
+
+    <!-- Books -->
     <section>
       <h2 class="text-2xl font-semibold mb-4">📄 Uploaded Books</h2>
       <div id="bookList" class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
     </section>
 
-    <!-- Important Links Section -->
+    <!-- Important Links -->
     <section class="mt-10">
       <h2 class="text-2xl font-semibold mb-4">🔗 Important Links</h2>
-      <ul id="importantLinks" class="list-disc ml-5 text-blue-700 space-y-1"></ul>
+      <ul id="importantLinks" class="list-disc ml-6 text-blue-600 dark:text-blue-400 space-y-1"></ul>
     </section>
   </main>
 
-  <footer class="bg-gray-200 text-center py-4 mt-10 text-sm">
+  <footer class="bg-gray-200 dark:bg-gray-800 text-center py-4 mt-10 text-sm text-gray-800 dark:text-gray-400">
     © 2025 FreeBookHub. All rights reserved.
   </footer>
+
+  <script>
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle("dark");
+    }
+  </script>
 
 </body>
 </html>
