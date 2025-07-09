@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Suggest a Link</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; }
+    input, button { display: block; margin: 1rem 0; padding: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h2>Suggest an Important Link</h2>
+  <input type="text" id="linkTitle" placeholder="Link Title" required />
+  <input type="url" id="linkURL" placeholder="https://..." required />
+  <button onclick="suggestLink()">Submit</button>
+  <p id="statusMsg"></p>
+
+  <script>
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
+
+async function suggestLink() {
+  const title = document.getElementById("linkTitle").value;
+  const url = document.getElementById("linkURL").value;
+  const msg = document.getElementById("statusMsg");
+
+  if (!title || !url) {
+    msg.innerText = "❌ Please fill both fields.";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${SHEET_API_URL}?method=suggestLink&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`);
+    const text = await res.text();
+    msg.innerText = text === "OK" ? "✅ Suggestion sent for approval!" : "❌ Failed to submit.";
+  } catch (err) {
+    msg.innerText = "❌ Network error.";
+  }
+}
+  </script>
+</body>
+</html>
