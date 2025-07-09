@@ -40,12 +40,11 @@ async function loadBooks() {
     console.error(err);
   }
 }
-
 async function confirmDelete(title, fileUrl) {
   const token = prompt("Enter admin password to delete:");
   if (!token) return;
 
-  const data = new URLSearchParams({
+  const formData = new URLSearchParams({
     method: "delete",
     title,
     fileUrl,
@@ -55,17 +54,19 @@ async function confirmDelete(title, fileUrl) {
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: data.toString()
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: formData.toString()
     });
 
-    const resultText = await res.text();
+    const result = await res.text();
 
-    if (resultText.trim() === "DELETED") {
+    if (result.trim() === "DELETED") {
       alert("✅ File deleted successfully.");
       loadBooks();
     } else {
-      alert("❌ Failed to delete:\n" + resultText);
+      alert("❌ Failed to delete:\n" + result);
     }
   } catch (err) {
     alert("❌ Error deleting file: " + err.message);
