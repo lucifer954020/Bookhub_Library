@@ -90,8 +90,14 @@ async function loadLinks() {
 
 async function updateVisitCount() {
   const el = document.getElementById("visitCount");
-  await fetch(`${API_URL}?method=logVisit`);
-  const res = await fetch(`${API_URL}?method=getVisitCount`);
-  const count = await res.text();
-  el.textContent = `👁 Total Visits: ${count}`;
+  try {
+    await fetch(`${API_URL}?method=logVisit`);
+    const res = await fetch(`${API_URL}?method=getVisitCount`);
+    const count = await res.text();
+    el.textContent = `👁 Total Visits: ${count}`;
+  } catch (err) {
+    el.textContent = "👁 Visits: Unknown";
+    console.error("Visit count error:", err);
+  }
 }
+
