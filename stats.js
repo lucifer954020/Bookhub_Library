@@ -2,23 +2,31 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm
 
 window.onload = async () => {
   try {
-    // Fetch all uploaded PDFs
+    // 🧾 Load visits
+    const resVisit = await fetch(`${API_URL}?method=getVisitCount`);
+    const visitCount = await resVisit.text();
+    document.getElementById("visitCount").textContent = visitCount || "0";
+
+    // 📄 Load books
     const resBooks = await fetch(API_URL);
     const books = await resBooks.json();
 
-    const totalPDFs = books.length;
-    const uniqueFolders = new Set(books.map(book => book.folder || "")).size;
+    const totalPDFs = Array.isArray(books) ? books.length : 0;
+    const uniqueFolders = new Set(books.map(book => book.folder || "Main")).size;
 
     document.getElementById("pdfCount").textContent = totalPDFs;
     document.getElementById("folderCount").textContent = uniqueFolders;
 
-    // Fetch approved links
+    // 🔗 Load links
     const resLinks = await fetch(`${API_URL}?method=links`);
     const links = await resLinks.json();
-    document.getElementById("linkCount").textContent = links.length;
+    document.getElementById("linkCount").textContent = Array.isArray(links) ? links.length : 0;
 
   } catch (err) {
-    console.error("Error loading stats:", err);
-    document.getElementById("stats").innerHTML = "❌ Failed to load stats.";
+    console.error("❌ Error loading stats:", err);
+    const statContainer = document.getElementById("stats");
+    if (statContainer) {
+      statContainer.innerHTML = "<p class='text-red-600 text-center'>❌ Failed to load stats. Please try again later.</p>";
+    }
   }
 };
