@@ -7,7 +7,18 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="index.js" defer></script>
 </head>
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 text-gray-900 transition-colors duration-300">
+
+  <!-- 🌙 Dark Mode Toggle -->
+  <div class="fixed top-4 right-4 z-10">
+    <label class="flex items-center space-x-2 text-sm cursor-pointer">
+      <input type="checkbox" id="darkToggle" class="hidden">
+      <span class="inline-block w-10 h-5 bg-gray-300 rounded-full relative">
+        <span id="toggleCircle" class="absolute left-0 top-0 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"></span>
+      </span>
+      <span>🌙 Dark Mode</span>
+    </label>
+  </div>
 
   <header class="bg-blue-600 text-white p-5 text-center shadow">
     <h1 class="text-3xl font-bold">📚 FreeBookHub</h1>
