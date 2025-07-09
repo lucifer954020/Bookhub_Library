@@ -1,45 +1,47 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
 
-// On page load
+// On load
 window.onload = () => {
   loadBooks();
   loadLinks();
   updateVisitCount();
-  setupDarkMode(); // 👈 initialize dark mode toggle
 };
 
+// 📚 Load PDF Books
 async function loadBooks() {
   const container = document.getElementById("bookList");
-  container.innerHTML = "Loading books...";
+  container.innerHTML = "📦 Loading books...";
 
   try {
     const res = await fetch(API_URL);
     const books = await res.json();
 
     if (!Array.isArray(books) || books.length === 0) {
-      container.innerHTML = "No books uploaded yet.";
+      container.innerHTML = "📭 No books uploaded yet.";
       return;
     }
 
     container.innerHTML = "";
     books.forEach(book => {
       const div = document.createElement("div");
-      div.className = "book-item";
+      div.className = "bg-white dark:bg-gray-800 p-4 rounded shadow text-sm";
       div.innerHTML = `
         <strong>${book.title}</strong><br>
-        Size: ${book.size} MB<br>
-        Uploaded: ${new Date(book.date).toLocaleString()}<br>
-        <a href="${book.link}" target="_blank">📥 Download</a>
-        <button onclick="confirmDelete('${book.title}', '${book.link}')">🗑 Delete</button>
-        <hr>
+        📁 Folder: ${book.folder || "Main"}<br>
+        📦 Size: ${book.size} MB<br>
+        📅 Date: ${new Date(book.date).toLocaleString()}<br>
+        <a href="${book.link}" target="_blank" class="text-blue-600 dark:text-blue-400">📥 Download</a>
+        <button onclick="confirmDelete('${book.title}', '${book.link}')" class="ml-2 bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs">🗑 Delete</button>
       `;
       container.appendChild(div);
     });
   } catch (err) {
     container.innerHTML = "❌ Failed to load books.";
-    console.error(err);
+    console.error("Book load error:", err);
   }
 }
+
+// 🧹 Confirm + Delete PDF
 async function confirmDelete(title, fileUrl) {
   const token = prompt("Enter admin password to delete:");
   if (!token) return;
@@ -61,26 +63,28 @@ async function confirmDelete(title, fileUrl) {
     });
 
     const result = await res.text();
-
     if (result.trim() === "DELETED") {
-      alert("✅ File deleted successfully.");
+      alert("✅ File deleted.");
       loadBooks();
     } else {
       alert("❌ Failed to delete:\n" + result);
     }
   } catch (err) {
-    alert("❌ Error deleting file: " + err.message);
+    alert("❌ Error: " + err.message);
   }
 }
 
+// 🔗 Load Approved Links
 async function loadLinks() {
   const container = document.getElementById("importantLinks");
+  container.innerHTML = "🔄 Loading links...";
+
   try {
     const res = await fetch(`${API_URL}?method=links`);
     const links = await res.json();
 
     if (!Array.isArray(links) || links.length === 0) {
-      container.innerHTML = "<i>No important links yet.</i>";
+      container.innerHTML = "<i>No links yet.</i>";
       return;
     }
 
@@ -92,10 +96,11 @@ async function loadLinks() {
     });
   } catch (err) {
     container.innerHTML = "❌ Failed to load links.";
-    console.error(err);
+    console.error("Link load error:", err);
   }
 }
 
+// 👁 Visit Counter
 async function updateVisitCount() {
   const el = document.getElementById("visitCount");
   try {
@@ -107,23 +112,4 @@ async function updateVisitCount() {
     el.textContent = "👁 Visits: Unknown";
     console.error("Visit count error:", err);
   }
-}
-
-// 🌙 Dark Mode Toggle Support
-function setupDarkMode() {
-  const toggle = document.getElementById("darkToggle");
-  const body = document.body;
-  const circle = document.getElementById("toggleCircle");
-
-  if (!toggle || !circle) return; // Don't run if toggle elements are missing
-
-  toggle.addEventListener("change", () => {
-    if (toggle.checked) {
-      body.classList.add("bg-gray-900", "text-white");
-      circle.classList.add("translate-x-5");
-    } else {
-      body.classList.remove("bg-gray-900", "text-white");
-      circle.classList.remove("translate-x-5");
-    }
-  });
 }
