@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Approve Links</title>
+  <style>
+    body { font-family: Arial; padding: 2rem; }
+    .link-item { margin-bottom: 1rem; }
+    button { margin-left: 1rem; }
+  </style>
+</head>
+<body>
+  <h2>Pending Link Approvals</h2>
+  <input type="password" id="adminToken" placeholder="Enter Admin Password" />
+  <button onclick="loadSuggestions()">Load Suggestions</button>
+  <div id="suggestions"></div>
+
+  <script>
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
+
+async function loadSuggestions() {
+  const token = document.getElementById("adminToken").value;
+  const container = document.getElementById("suggestions");
+  container.innerHTML = "Loading...";
+
+  try {
+    const res = await fetch(`${SHEET_API_URL}?method=getSuggestions&token=${token}`);
+    const data = await res.json();
+
+    container.innerHTML = "";
+    data.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "link-item";
+      div.innerHTML = `
+        <strong>${item.title}</strong> - <a href="${item.url}" target="_blank">${item.url}</a>
+        <button onclick="approve('${item.title}', '${item.url}', '${token}', this)">Approve</button>
+      `;
+      container.appendChild(div);
+    });
+
+    if (data.length === 0) container.innerText = "✅ No pending suggestions.";
+  } catch (err) {
+    container.innerText = "❌ Failed to load suggestions.";
+  }
+}
+
+async function approve(title, url, token, button) {
+  try {
+    const res = await fetch(`${SHEET_API_URL}?method=approveLink&token=${token}&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`);
+    const result = await res.text();
+    if (result === "OK") {
+      button.parentElement.remove();
+    } else {
+      alert("❌ Failed to approve.");
+    }
+  } catch (err) {
+    alert("❌ Error approving.");
+  }
+}
+  </script>
+</body>
+</html>
