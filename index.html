@@ -16,6 +16,8 @@
       <a href="index.html" class="hover:underline">🏠 Home</a>
       <a href="upload.html" class="hover:underline">📤 Upload</a>
       <a href="filter.html" class="hover:underline">🔍 Filter</a>
+      <a href="stats.html" class="hover:underline">📊 Stats</a>
+      <a href="suggest-link.html" class="hover:underline">💡 Suggest Link</a>
       <button onclick="toggleDarkMode()" class="bg-gray-800 px-2 py-1 rounded text-xs">🌓 Toggle Theme</button>
     </nav>
   </header>
@@ -26,23 +28,32 @@
     <!-- Visit Counter -->
     <div id="visitCount" class="mb-4 text-sm text-gray-700 dark:text-gray-300">👁 Loading visits...</div>
 
-    <!-- Books -->
+    <!-- 📁 Folder Upload Shortcut -->
+    <div class="mb-8 text-center">
+      <a href="upload.html" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded inline-block">
+        📁 Create Folder & Upload PDF
+      </a>
+    </div>
+
+    <!-- 📄 Uploaded PDFs -->
     <section>
       <h2 class="text-2xl font-semibold mb-4">📄 Uploaded Books</h2>
       <div id="bookList" class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
     </section>
 
-    <!-- Important Links -->
+    <!-- 🔗 Important Links -->
     <section class="mt-10">
       <h2 class="text-2xl font-semibold mb-4">🔗 Important Links</h2>
       <ul id="importantLinks" class="list-disc ml-6 text-blue-600 dark:text-blue-400 space-y-1"></ul>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="bg-gray-200 dark:bg-gray-800 text-center py-4 mt-10 text-sm text-gray-800 dark:text-gray-400">
     © 2025 FreeBookHub. All rights reserved.
   </footer>
 
+  <!-- Toggle Theme Script -->
   <script>
     function toggleDarkMode() {
       document.documentElement.classList.toggle("dark");
