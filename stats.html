@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <title>📊 FreeBookHub Stats</title>
@@ -9,28 +9,45 @@
 </head>
 <body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white transition-colors">
 
-  <main class="max-w-4xl mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-6">📊 Site Statistics</h1>
+  <!-- Header -->
+  <header class="bg-blue-600 dark:bg-blue-800 text-white px-6 py-4 flex justify-between items-center shadow">
+    <div class="text-xl font-bold">📊 FreeBookHub Stats</div>
+    <button onclick="toggleDarkMode()" class="bg-gray-800 px-2 py-1 rounded text-xs">🌓 Toggle Theme</button>
+  </header>
 
-    <div id="stats" class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 text-center">
+  <!-- Main Stats -->
+  <main class="max-w-4xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6 text-center">📈 Site Statistics Overview</h1>
+
+    <div id="stats" class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 text-center">
       <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-        <h2 class="text-xl font-semibold">📄 Total PDFs</h2>
+        <h2 class="text-lg font-semibold">📄 Total PDFs</h2>
         <p id="pdfCount" class="text-3xl font-bold mt-2">...</p>
       </div>
       <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-        <h2 class="text-xl font-semibold">📁 Total Folders</h2>
+        <h2 class="text-lg font-semibold">📁 Total Folders</h2>
         <p id="folderCount" class="text-3xl font-bold mt-2">...</p>
       </div>
       <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-        <h2 class="text-xl font-semibold">🔗 Approved Links</h2>
+        <h2 class="text-lg font-semibold">🔗 Approved Links</h2>
         <p id="linkCount" class="text-3xl font-bold mt-2">...</p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
+        <h2 class="text-lg font-semibold">👁 Total Visits</h2>
+        <p id="visitCount" class="text-3xl font-bold mt-2">...</p>
       </div>
     </div>
 
-    <div class="mt-6">
+    <div class="mt-10 text-center">
       <a href="index.html" class="text-blue-600 hover:underline">⬅️ Back to Home</a>
     </div>
   </main>
+
+  <script>
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle("dark");
+    }
+  </script>
 
 </body>
 </html>
