@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard - FreeBookHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900 p-6 max-w-3xl mx-auto">
+
+  <h1 class="text-2xl font-bold mb-4">📊 Admin Dashboard</h1>
+
+  <div class="mb-4">
+    <label class="block text-sm mb-1">Enter Admin Password:</label>
+    <input type="password" id="adminPass" class="w-full p-2 border rounded" placeholder="Pawan123@" />
+    <button onclick="loadStats()" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Load Stats</button>
+  </div>
+
+  <div id="statsOutput" class="space-y-3 mt-6 text-lg font-medium"></div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
+
+    async function loadStats() {
+      const token = document.getElementById("adminPass").value.trim();
+      const output = document.getElementById("statsOutput");
+      output.innerHTML = "Loading stats...";
+
+      try {
+        const booksRes = await fetch(API_URL);
+        const books = await booksRes.json();
+        const folders = [...new Set(books.map(b => b.folder).filter(f => f))];
+        const lastUpload = books.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+        const linksRes = await fetch(`${API_URL}?method=links`);
+        const links = await linksRes.json();
+
+        const visitRes = await fetch(`${API_URL}?method=getVisitCount`);
+        const visits = await visitRes.text();
+
+        output.innerHTML = `
+          👁 Total Visits: <strong>${visits}</strong><br>
+          📚 Total PDFs: <strong>${books.length}</strong><br>
+          📁 Total Folders: <strong>${folders.length}</strong><br>
+          🔗 Approved Links: <strong>${links.length}</strong><br>
+          🕒 Last Upload: <strong>${new Date(lastUpload.date).toLocaleString()}</strong>
+        `;
+      } catch (err) {
+        output.innerHTML = "❌ Failed to load stats.";
+        console.error(err);
+      }
+    }
+  </script>
+
+</body>
+</html>
