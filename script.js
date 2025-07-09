@@ -1,37 +1,68 @@
-const UPLOAD_API_URL = "https://script.google.com/macros/s/AKfycbzwTDUbzfuInO33rPEapcZlFMHwKF2UuieXrn570n7lQtg1ywwGouhzqmfcFhea-AADuw/exec";
+const UPLOAD_API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
 
-document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("uploadForm");
+  const message = document.getElementById("responseMsg");
+  const progress = document.getElementById("progressBar");
 
-  const form = e.target;
-  const title = form.description.value;
-  const file = form.file.files[0];
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  if (!file) {
-    alert("Please select a PDF file");
-    return;
-  }
+    const title = form.description.value.trim();
+    const file = form.file.files[0];
+    const password = form.pdfPassword.value;
+    const folderName = form.folderName.value.trim();
 
-  const formData = new FormData();
-  formData.append("description", title);
-  formData.append("file", file);
-
-  try {
-    const res = await fetch(UPLOAD_API_URL, {
-      method: "POST",
-      body: formData,
-    });
-
-    const link = await res.text();
-    console.log("Upload response:", link);
-
-    if (link.startsWith("https://")) {
-      document.getElementById("responseMsg").innerHTML = `✅ Uploaded successfully! <a href="${link}" target="_blank">View PDF</a>`;
-    } else {
-      document.getElementById("responseMsg").innerText = "⚠️ Upload failed: " + link;
+    if (!file || file.type !== "application/pdf") {
+      alert("Please upload a valid PDF.");
+      return;
     }
-  } catch (error) {
-    console.error("Upload error:", error);
-    document.getElementById("responseMsg").innerText = "⚠️ Error: " + error.message;
-  }
+
+    message.innerText = "📤 Preparing file...";
+    progress.value = 0;
+    progress.classList.remove("hidden");
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1];
+      const data = new URLSearchParams({
+        method: "upload",
+        file: base64,
+        filename: file.name,
+        description: title,
+        pdfPassword: password,
+        folderName: folderName
+      });
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", UPLOAD_API_URL, true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progress.value = percent;
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200 && xhr.responseText.startsWith("https://")) {
+          message.innerHTML = `✅ Uploaded successfully! <a href="${xhr.responseText}" target="_blank" class="text-blue-600 underline">View PDF</a>`;
+        } else {
+          message.innerText = "❌ Upload failed: " + xhr.responseText;
+        }
+        progress.classList.add("hidden");
+      };
+
+      xhr.onerror = () => {
+        message.innerText = "❌ Upload error.";
+        progress.classList.add("hidden");
+      };
+
+      xhr.send(data);
+    };
+
+    reader.readAsDataURL(file);
+  });
 });
