@@ -1,5 +1,4 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
-const ADMIN_TOKEN = "Pawan123@";
 
 // On page load
 window.onload = () => {
@@ -16,7 +15,7 @@ async function loadBooks() {
     const res = await fetch(API_URL);
     const books = await res.json();
 
-    if (books.length === 0) {
+    if (!Array.isArray(books) || books.length === 0) {
       container.innerHTML = "No books uploaded yet.";
       return;
     }
@@ -37,13 +36,15 @@ async function loadBooks() {
     });
   } catch (err) {
     container.innerHTML = "❌ Failed to load books.";
+    console.error(err);
   }
 }
+
 async function confirmDelete(title, fileUrl) {
   const token = prompt("Enter admin password to delete:");
   if (!token) return;
 
-  const params = new URLSearchParams({
+  const data = new URLSearchParams({
     method: "delete",
     title,
     fileUrl,
@@ -51,7 +52,12 @@ async function confirmDelete(title, fileUrl) {
   });
 
   try {
-    const res = await fetch(`${API_URL}?${params.toString()}`);
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: data.toString()
+    });
+
     const resultText = await res.text();
 
     if (resultText.trim() === "DELETED") {
@@ -61,7 +67,7 @@ async function confirmDelete(title, fileUrl) {
       alert("❌ Failed to delete:\n" + resultText);
     }
   } catch (err) {
-    alert("❌ Error: " + err.message);
+    alert("❌ Error deleting file: " + err.message);
   }
 }
 
@@ -71,7 +77,7 @@ async function loadLinks() {
     const res = await fetch(`${API_URL}?method=links`);
     const links = await res.json();
 
-    if (links.length === 0) {
+    if (!Array.isArray(links) || links.length === 0) {
       container.innerHTML = "<i>No important links yet.</i>";
       return;
     }
@@ -82,8 +88,9 @@ async function loadLinks() {
       li.innerHTML = `<a href="${link.url}" target="_blank">${link.title}</a>`;
       container.appendChild(li);
     });
-  } catch {
+  } catch (err) {
     container.innerHTML = "❌ Failed to load links.";
+    console.error(err);
   }
 }
 
@@ -99,4 +106,3 @@ async function updateVisitCount() {
     console.error("Visit count error:", err);
   }
 }
-
