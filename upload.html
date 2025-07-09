@@ -2,83 +2,99 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Upload PDF - FreeBookHub</title>
+  <title>📤 Upload PDF - FreeBookHub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-white text-gray-900 p-6 max-w-xl mx-auto">
+  <script defer>
+const UPLOAD_API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
 
-  <h1 class="text-2xl font-bold mb-4">📤 Upload a PDF Book</h1>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("uploadForm");
+  const message = document.getElementById("responseMsg");
+  const progress = document.getElementById("progressBar");
 
-  <form id="uploadForm" class="space-y-4">
-    <input type="text" name="description" placeholder="PDF Title" class="w-full p-2 border rounded" required />
-    <input type="file" name="file" accept="application/pdf" class="w-full p-2 border rounded" required />
-    <input type="text" name="folderName" placeholder="Optional Folder Name" class="w-full p-2 border rounded" />
-    <input type="text" name="pdfPassword" placeholder="Optional PDF Password" class="w-full p-2 border rounded" />
-    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Upload</button>
-  </form>
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  <div id="progressText" class="mt-4 text-sm text-gray-700"></div>
+    const title = form.description.value.trim();
+    const file = form.file.files[0];
+    const password = form.pdfPassword.value;
+    const folderName = form.folderName.value.trim();
 
-  <script>
-    const UPLOAD_API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
+    if (!file || file.type !== "application/pdf") {
+      alert("Please upload a valid PDF.");
+      return;
+    }
 
-    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const progressText = document.getElementById("progressText");
+    message.innerText = "📤 Preparing file...";
+    progress.value = 0;
+    progress.classList.remove("hidden");
 
-      const title = e.target.description.value.trim();
-      const file = e.target.file.files[0];
-      const password = e.target.pdfPassword.value.trim();
-      const folderName = e.target.folderName.value.trim();
+    const reader = new FileReader();
 
-      if (!file || file.type !== "application/pdf") {
-        alert("Please select a valid PDF file.");
-        return;
-      }
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1];
+      const data = new URLSearchParams({
+        file: base64,
+        filename: file.name,
+        description: title,
+        pdfPassword: password,
+        folderName
+      });
 
-      progressText.textContent = "📤 Preparing file...";
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", UPLOAD_API_URL, true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-      const reader = new FileReader();
-      reader.onload = function () {
-        const base64File = reader.result.split(",")[1];
-
-        const data = new URLSearchParams({
-          file: base64File,
-          filename: file.name,
-          description: title,
-          pdfPassword: password,
-          folderName: folderName
-        });
-
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", UPLOAD_API_URL, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-        xhr.upload.onprogress = function (event) {
-          if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 100);
-            progressText.textContent = `📤 Uploading... ${percent}%`;
-          }
-        };
-
-        xhr.onload = function () {
-          if (xhr.status === 200 && xhr.responseText.startsWith("https://")) {
-            progressText.innerHTML = `✅ Uploaded! <a href="${xhr.responseText}" target="_blank" class="text-blue-700 underline">View PDF</a>`;
-          } else {
-            progressText.textContent = "❌ Upload failed: " + xhr.responseText;
-          }
-        };
-
-        xhr.onerror = function () {
-          progressText.textContent = "❌ Upload error.";
-        };
-
-        xhr.send(data);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progress.value = percent;
+        }
       };
 
-      reader.readAsDataURL(file);
-    });
+      xhr.onload = () => {
+        if (xhr.status === 200 && xhr.responseText.startsWith("https://")) {
+          message.innerHTML = `✅ Uploaded successfully! <a href="${xhr.responseText}" target="_blank" class="text-blue-600 underline">View PDF</a>`;
+        } else {
+          message.innerText = "❌ Upload failed: " + xhr.responseText;
+        }
+        progress.classList.add("hidden");
+      };
+
+      xhr.onerror = () => {
+        message.innerText = "❌ Upload error.";
+        progress.classList.add("hidden");
+      };
+
+      xhr.send(data);
+    };
+
+    reader.readAsDataURL(file);
+  });
+});
   </script>
+</head>
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white transition-colors">
+
+  <main class="p-6 max-w-xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">📤 Upload a PDF</h1>
+
+    <form id="uploadForm" class="space-y-4">
+      <input type="text" name="description" placeholder="Enter PDF Title" required class="w-full p-2 border rounded" />
+      <input type="file" name="file" accept="application/pdf" required class="w-full p-2 border rounded" />
+      <input type="text" name="pdfPassword" placeholder="Optional PDF Password" class="w-full p-2 border rounded" />
+      <input type="text" name="folderName" placeholder="Optional Folder Name" class="w-full p-2 border rounded" />
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Upload</button>
+    </form>
+
+    <progress id="progressBar" value="0" max="100" class="w-full mt-4 hidden"></progress>
+    <p id="responseMsg" class="mt-4 text-sm text-gray-700 dark:text-gray-300"></p>
+
+    <div class="mt-6">
+      <a href="index.html" class="text-blue-600 hover:underline">⬅️ Back to Home</a>
+    </div>
+  </main>
+
 </body>
 </html>
