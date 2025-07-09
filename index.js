@@ -4,14 +4,10 @@ let adminToken = null;
 
 async function loadBooks() {
   try {
-    // Log the visit count
     await fetch(SHEET_API_URL + "?method=logVisit");
-
-    // Fetch book data
     const res = await fetch(SHEET_API_URL);
     const data = await res.json();
     books = data;
-
     displayBooks(books);
     loadLinks();
     showVisitorCount();
@@ -145,8 +141,16 @@ async function showVisitorCount() {
   try {
     const res = await fetch(SHEET_API_URL + "?method=getVisitCount");
     const count = await res.text();
-    const footer = document.getElementById("visitCount");
-    if (footer) footer.innerText = `👀 Visitors: ${count}`;
+
+    // Auto-insert visitor counter in footer
+    let footer = document.querySelector("footer");
+    if (footer) {
+      const visitDiv = document.createElement("div");
+      visitDiv.id = "visitCount";
+      visitDiv.className = "mt-2 text-sm text-white opacity-80";
+      visitDiv.textContent = `👀 Visitors: ${count}`;
+      footer.appendChild(visitDiv);
+    }
   } catch (err) {
     console.warn("Visitor counter failed.");
   }
