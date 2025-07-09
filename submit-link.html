@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Submit Link - FreeBookHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 p-6 max-w-xl mx-auto">
+
+  <h1 class="text-2xl font-bold mb-4">🔗 Suggest a Useful Link</h1>
+
+  <form id="submitLinkForm" class="space-y-4">
+    <input type="text" name="title" placeholder="Enter link title" class="w-full p-2 border rounded" required />
+    <input type="url" name="url" placeholder="Paste full URL (https://...)" class="w-full p-2 border rounded" required />
+    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Submit</button>
+  </form>
+
+  <div id="responseMsg" class="mt-4 text-sm text-green-700 font-medium"></div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
+
+    document.getElementById("submitLinkForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("responseMsg");
+
+      const title = e.target.title.value.trim();
+      const url = e.target.url.value.trim();
+
+      if (!title || !url) {
+        msg.textContent = "Please fill out both fields.";
+        return;
+      }
+
+      msg.textContent = "📤 Submitting...";
+
+      try {
+        const res = await fetch(`${API_URL}?method=suggestLink&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`);
+        const result = await res.text();
+        if (result === "OK") {
+          msg.textContent = "✅ Thank you! Your link will appear once approved by admin.";
+          e.target.reset();
+        } else {
+          msg.textContent = "❌ Submission failed.";
+        }
+      } catch (err) {
+        msg.textContent = "❌ Network error.";
+      }
+    });
+  </script>
+
+</body>
+</html>
