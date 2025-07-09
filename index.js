@@ -1,4 +1,5 @@
-const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
+// index.js
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbzwTDUbzfuInO33rPEapcZlFMHwKF2UuieXrn570n7lQtg1ywwGouhzqmfcFhea-AADuw/exec";
 
 let books = [];
 let adminToken = null;
@@ -9,6 +10,7 @@ async function loadBooks() {
     const data = await res.json();
     books = data;
     displayBooks(books);
+    loadLinks();
   } catch (err) {
     console.error("Failed to load books:", err);
   }
@@ -49,6 +51,7 @@ function checkAdminAccess() {
     if (token === "Pawan123@") {
       adminToken = token;
       document.querySelectorAll(".delete-btn").forEach(btn => btn.classList.remove("hidden"));
+      addLinkUploadForm();
     } else {
       alert("❌ Invalid token.");
     }
@@ -57,20 +60,16 @@ function checkAdminAccess() {
 
 async function handleDelete(title, fileUrl, cardElement) {
   if (!adminToken) return alert("Admin token not set.");
-
   const confirmDelete = confirm(`Are you sure you want to delete "${title}"?`);
   if (!confirmDelete) return;
 
-  const response = await fetch("https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec?method=delete", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      token: adminToken,
-      fileUrl: fileUrl,
-      title: title
-    })
-  });
+  const url = new URL(SHEET_API_URL);
+  url.searchParams.append("method", "delete");
+  url.searchParams.append("token", adminToken);
+  url.searchParams.append("fileUrl", fileUrl);
+  url.searchParams.append("title", title);
 
+  const response = await fetch(url);
   const result = await response.text();
   if (result === "DELETED") {
     alert("✅ Deleted successfully.");
@@ -81,14 +80,14 @@ async function handleDelete(title, fileUrl, cardElement) {
 }
 
 document.getElementById("searchInput").addEventListener("input", () => {
-  const keyword = searchInput.value.toLowerCase();
+  const keyword = document.getElementById("searchInput").value.toLowerCase();
   const filtered = books.filter(b => b.title.toLowerCase().includes(keyword));
   displayBooks(filtered);
 });
 
 document.getElementById("sortBy").addEventListener("change", () => {
   const sorted = [...books];
-  const sortBy = sortSelect.value;
+  const sortBy = document.getElementById("sortBy").value;
   if (sortBy === "name") {
     sorted.sort((a, b) => a.title.localeCompare(b.title));
   } else if (sortBy === "recent") {
@@ -98,5 +97,43 @@ document.getElementById("sortBy").addEventListener("change", () => {
   }
   displayBooks(sorted);
 });
+
+async function loadLinks() {
+  const linkList = document.getElementById("linkList");
+  linkList.innerHTML = "<li>Loading...</li>";
+  try {
+    const res = await fetch(SHEET_API_URL + "?method=links");
+    const links = await res.json();
+    linkList.innerHTML = "";
+    links.forEach(link => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="${link.url}" target="_blank" class="text-blue-600 hover:underline">${link.title}</a>`;
+      linkList.appendChild(li);
+    });
+  } catch (e) {
+    linkList.innerHTML = "<li>Failed to load links.</li>";
+  }
+}
+
+function addLinkUploadForm() {
+  const container = document.getElementById("importantLinks");
+  const form = document.createElement("form");
+  form.classList.add("mt-4");
+  form.innerHTML = `
+    <input type="text" id="linkTitle" placeholder="Link Title" class="p-2 border rounded mr-2 mb-2" />
+    <input type="url" id="linkURL" placeholder="https://..." class="p-2 border rounded mr-2 mb-2" />
+    <button class="bg-green-600 text-white px-4 py-2 rounded">Add</button>
+  `;
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const title = document.getElementById("linkTitle").value;
+    const url = document.getElementById("linkURL").value;
+
+    await fetch(SHEET_API_URL + "?method=addlink&token=" + adminToken + "&title=" + encodeURIComponent(title) + "&url=" + encodeURIComponent(url));
+    alert("✅ Link added.");
+    loadLinks();
+  };
+  container.appendChild(form);
+}
 
 window.onload = loadBooks;
