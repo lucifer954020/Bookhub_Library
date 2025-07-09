@@ -39,7 +39,6 @@ async function loadBooks() {
     container.innerHTML = "❌ Failed to load books.";
   }
 }
-
 async function confirmDelete(title, fileUrl) {
   const token = prompt("Enter admin password to delete:");
   if (!token) return;
@@ -52,17 +51,17 @@ async function confirmDelete(title, fileUrl) {
   });
 
   try {
-    const res = await fetch(`${API_URL}?${params}`);
-    const result = await res.text();
+    const res = await fetch(`${API_URL}?${params.toString()}`);
+    const resultText = await res.text();
 
-    if (result === "DELETED") {
-      alert("✅ Deleted successfully.");
+    if (resultText.trim() === "DELETED") {
+      alert("✅ File deleted successfully.");
       loadBooks();
     } else {
-      alert("❌ Failed to delete: " + result);
+      alert("❌ Failed to delete:\n" + resultText);
     }
-  } catch {
-    alert("❌ Error during deletion.");
+  } catch (err) {
+    alert("❌ Error: " + err.message);
   }
 }
 
