@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Export Data - FreeBookHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-900 p-6 max-w-xl mx-auto">
+
+  <h1 class="text-2xl font-bold mb-4">📤 Export Uploaded PDFs</h1>
+
+  <label class="block mb-2">Admin Password:</label>
+  <input type="password" id="adminPass" placeholder="Pawan123@" class="w-full p-2 border rounded mb-4">
+  <button onclick="exportToCSV()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Download CSV</button>
+
+  <div id="msg" class="mt-4 text-sm text-blue-700"></div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
+
+    async function exportToCSV() {
+      const token = document.getElementById("adminPass").value.trim();
+      const msg = document.getElementById("msg");
+
+      if (token !== "Pawan123@") {
+        msg.textContent = "❌ Invalid password.";
+        return;
+      }
+
+      const res = await fetch(API_URL);
+      const data = await res.json();
+
+      const headers = ["Title", "Link", "Size (MB)", "Date", "Folder"];
+      const rows = data.map(row => [
+        row.title,
+        row.link,
+        row.size,
+        new Date(row.date).toLocaleString(),
+        row.folder || ""
+      ]);
+
+      const csv = [headers, ...rows].map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "FreeBookHub_PDF_List.csv";
+      a.click();
+
+      msg.textContent = "✅ CSV downloaded.";
+    }
+  </script>
+
+</body>
+</html>
