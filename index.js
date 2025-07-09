@@ -1,17 +1,20 @@
-// index.js
 const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
-const UPLOAD_API_URL = SHEET_API_URL;
-
 let books = [];
 let adminToken = null;
 
 async function loadBooks() {
   try {
+    // Log the visit count
+    await fetch(SHEET_API_URL + "?method=logVisit");
+
+    // Fetch book data
     const res = await fetch(SHEET_API_URL);
     const data = await res.json();
     books = data;
+
     displayBooks(books);
     loadLinks();
+    showVisitorCount();
   } catch (err) {
     console.error("Failed to load books:", err);
   }
@@ -46,16 +49,13 @@ function displayBooks(bookList) {
 }
 
 function checkAdminAccess() {
-  const isAdmin = confirm("Are you an admin? Click OK to enter token.");
-  if (isAdmin) {
-    const token = prompt("Enter admin delete token:");
-    if (token === "Pawan123@") {
-      adminToken = token;
-      document.querySelectorAll(".delete-btn").forEach(btn => btn.classList.remove("hidden"));
-      addLinkUploadForm();
-    } else {
-      alert("❌ Invalid token.");
-    }
+  const token = prompt("Enter delete password (only required to delete PDFs):");
+  if (token === "Pawan123@") {
+    adminToken = token;
+    document.querySelectorAll(".delete-btn").forEach(btn => btn.classList.remove("hidden"));
+    addLinkUploadForm();
+  } else {
+    alert("❌ Invalid token. You won't be able to delete.");
   }
 }
 
@@ -70,13 +70,17 @@ async function handleDelete(title, fileUrl, cardElement) {
   url.searchParams.append("fileUrl", fileUrl);
   url.searchParams.append("title", title);
 
-  const response = await fetch(url);
-  const result = await response.text();
-  if (result === "DELETED") {
-    alert("✅ Deleted successfully.");
-    cardElement.remove();
-  } else {
-    alert("❌ Failed: " + result);
+  try {
+    const response = await fetch(url);
+    const result = await response.text();
+    if (result === "DELETED") {
+      alert("✅ Deleted successfully.");
+      cardElement.remove();
+    } else {
+      alert("❌ Failed: " + result);
+    }
+  } catch (err) {
+    alert("❌ Error deleting file: " + err.message);
   }
 }
 
@@ -135,6 +139,17 @@ function addLinkUploadForm() {
     loadLinks();
   };
   container.appendChild(form);
+}
+
+async function showVisitorCount() {
+  try {
+    const res = await fetch(SHEET_API_URL + "?method=getVisitCount");
+    const count = await res.text();
+    const footer = document.getElementById("visitCount");
+    if (footer) footer.innerText = `👀 Visitors: ${count}`;
+  } catch (err) {
+    console.warn("Visitor counter failed.");
+  }
 }
 
 window.onload = loadBooks;
