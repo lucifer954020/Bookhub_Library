@@ -2,28 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>FreeBookHub - Home</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 2rem; background: #f0f2f5; }
-    h1 { color: #333; }
-    .book-item { background: #fff; padding: 1rem; margin: 1rem 0; border-radius: 6px; }
-    button { margin-top: 0.5rem; background: #ff4d4f; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
-    a { color: #0066cc; }
-    ul { padding-left: 1rem; }
-  </style>
+  <title>📚 FreeBookHub - Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="index.js" defer></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-900">
 
-  <h1>📚 FreeBookHub</h1>
-  <p>Welcome to your private library. Here are your uploaded books:</p>
+  <header class="bg-blue-600 text-white p-5 text-center shadow">
+    <h1 class="text-3xl font-bold">📚 FreeBookHub</h1>
+    <p class="text-sm">Your private PDF library. Admins can manage. Visitors can download freely.</p>
+    <div id="visitCount" class="mt-2 text-sm opacity-80"></div>
+  </header>
 
-  <div id="bookList">Loading...</div>
+  <main class="p-6 max-w-5xl mx-auto">
+    <!-- PDF Section -->
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">📄 Uploaded Books</h2>
+      <div id="bookList" class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
+    </section>
 
-  <h2>🌐 Important Links</h2>
-  <ul id="importantLinks"></ul>
+    <!-- Important Links Section -->
+    <section class="mt-10">
+      <h2 class="text-2xl font-semibold mb-4">🔗 Important Links</h2>
+      <ul id="importantLinks" class="list-disc ml-5 text-blue-700 space-y-1"></ul>
+    </section>
+  </main>
 
-  <div id="visitCount" class="mt-2 text-sm text-gray-600"></div>
+  <footer class="bg-gray-200 text-center py-4 mt-10 text-sm">
+    © 2025 FreeBookHub. All rights reserved.
+  </footer>
 
-  <script src="index.js"></script>
 </body>
 </html>
