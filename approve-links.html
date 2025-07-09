@@ -6,7 +6,7 @@
   <style>
     body { font-family: Arial; padding: 2rem; }
     .link-item { margin-bottom: 1rem; }
-    button { margin-left: 1rem; }
+    button { margin-left: 0.5rem; }
   </style>
 </head>
 <body>
@@ -34,6 +34,7 @@ async function loadSuggestions() {
       div.innerHTML = `
         <strong>${item.title}</strong> - <a href="${item.url}" target="_blank">${item.url}</a>
         <button onclick="approve('${item.title}', '${item.url}', '${token}', this)">Approve</button>
+        <button onclick="deleteSuggestion('${item.title}', '${item.url}', '${token}', this)">Delete</button>
       `;
       container.appendChild(div);
     });
@@ -55,6 +56,20 @@ async function approve(title, url, token, button) {
     }
   } catch (err) {
     alert("❌ Error approving.");
+  }
+}
+
+async function deleteSuggestion(title, url, token, button) {
+  try {
+    const res = await fetch(`${SHEET_API_URL}?method=deleteSuggestedLink&token=${token}&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`);
+    const result = await res.text();
+    if (result === "OK") {
+      button.parentElement.remove();
+    } else {
+      alert("❌ Failed to delete.");
+    }
+  } catch (err) {
+    alert("❌ Error deleting.");
   }
 }
   </script>
