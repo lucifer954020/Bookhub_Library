@@ -2,53 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Submit Link - FreeBookHub</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Approve Suggested Links - FreeBookHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .link-card {
+      @apply bg-white dark:bg-gray-800 p-4 rounded shadow mb-4;
+    }
+    .link-card button {
+      @apply bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded mr-2;
+    }
+    .link-card .delete-btn {
+      @apply bg-red-600 hover:bg-red-700;
+    }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-800 p-6 max-w-xl mx-auto">
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white transition-colors">
 
-  <h1 class="text-2xl font-bold mb-4">🔗 Suggest a Useful Link</h1>
+  <main class="max-w-3xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-4">🔐 Admin - Approve Suggested Links</h1>
 
-  <form id="submitLinkForm" class="space-y-4">
-    <input type="text" name="title" placeholder="Enter link title" class="w-full p-2 border rounded" required />
-    <input type="url" name="url" placeholder="Paste full URL (https://...)" class="w-full p-2 border rounded" required />
-    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Submit</button>
-  </form>
+    <input type="password" id="adminToken" placeholder="Enter Admin Password" class="w-full px-4 py-2 mb-4 border rounded dark:bg-gray-800 dark:border-gray-600"/>
 
-  <div id="responseMsg" class="mt-4 text-sm text-green-700 font-medium"></div>
+    <button onclick="loadSuggestions()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">🔄 Load Suggestions</button>
+
+    <div id="suggestions" class="mt-6"></div>
+
+    <div class="text-center mt-8">
+      <a href="admin.html" class="text-blue-500 hover:underline">⬅️ Back to Admin Panel</a>
+    </div>
+  </main>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
 
-    document.getElementById("submitLinkForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const msg = document.getElementById("responseMsg");
-
-      const title = e.target.title.value.trim();
-      const url = e.target.url.value.trim();
-
-      if (!title || !url) {
-        msg.textContent = "Please fill out both fields.";
+    async function loadSuggestions() {
+      const token = document.getElementById("adminToken").value.trim();
+      const container = document.getElementById("suggestions");
+      if (!token) {
+        alert("Please enter the admin password.");
         return;
       }
 
-      msg.textContent = "📤 Submitting...";
+      container.innerHTML = "🔄 Loading...";
 
       try {
-        const res = await fetch(`${API_URL}?method=suggestLink&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`);
-        const result = await res.text();
-        if (result === "OK") {
-          msg.textContent = "✅ Thank you! Your link will appear once approved by admin.";
-          e.target.reset();
-        } else {
-          msg.textContent = "❌ Submission failed.";
-        }
-      } catch (err) {
-        msg.textContent = "❌ Network error.";
-      }
-    });
-  </script>
+        const res = await fetch(`${API_URL}?method=getSuggestions&token=${token}`);
+        const data = await res.json();
 
+        if (!Array.isArray(data) || data.length === 0) {
+          container.innerHTML = "✅ No pending suggestions.";
+          return;
+        }
+
+        container.innerHTML = "";
+        data.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "link-card";
+
+          div.innerHTML = `
+            <strong>${item.title}</strong><br>
+            <a href="${item.url}" target="_blank" class="text-blue-500 underline">${item.url}</a><br><br>
+            <button onclick="approveLink('${item.title}', '${item.url}', '${token}', this)">✅ Approve</button>
+            <button class="delete-btn" onclick="deleteLink('${item.title}', '${item.url}', '${token}', this)">🗑 Delete</button>
+          `;
+
+          container.appendChild(div);
+        });
+
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = "❌ Failed to load suggestions.";
+      }
+    }
+
+    async function approveLink(title, url, token, btn) {
+      const params = new URLSearchParams({
+        method: "approveLink",
+        title,
+        url,
+        token
+      });
+
+      const res = await fetch(`${API_URL}?${params.toString()}`);
+      const result = await res.text();
+
+      if (result === "OK") {
+        btn.parentElement.remove();
+      } else {
+        alert("❌ Failed to approve link.");
+      }
+    }
+
+    async function deleteLink(title, url, token, btn) {
+      const params = new URLSearchParams({
+        method: "deleteSuggestedLink",
+        title,
+        url,
+        token
+      });
+
+      const res = await fetch(`${API_URL}?${params.toString()}`);
+      const result = await res.text();
+
+      if (result === "OK") {
+        btn.parentElement.remove();
+      } else {
+        alert("❌ Failed to delete link.");
+      }
+    }
+  </script>
 </body>
 </html>
