@@ -1,46 +1,73 @@
-<script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Suggest a Link - FreeBookHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white transition-colors">
 
-  document.getElementById("suggestForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const title = form.title.value.trim();
-    const url = form.url.value.trim();
-    const responseEl = document.getElementById("response");
+  <main class="max-w-xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6 text-center">🔗 Suggest a Link</h1>
 
-    if (!title || !url) {
-      responseEl.textContent = "❌ Please fill in all fields.";
-      return;
-    }
+    <form id="suggestForm" class="bg-white dark:bg-gray-800 p-6 rounded shadow space-y-4">
+      <input type="text" id="linkTitle" placeholder="Link Title" required class="w-full px-4 py-2 rounded border dark:bg-gray-700 dark:border-gray-600"/>
+      <input type="url" id="linkUrl" placeholder="Link URL (https://...)" required class="w-full px-4 py-2 rounded border dark:bg-gray-700 dark:border-gray-600"/>
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">📤 Submit</button>
+      <p id="response" class="text-sm mt-2 text-center"></p>
+    </form>
 
-    responseEl.textContent = "⏳ Submitting...";
+    <div class="text-center mt-6">
+      <a href="index.html" class="text-blue-600 hover:underline">⬅️ Back to Home</a>
+    </div>
+  </main>
 
-    try {
-      const params = new URLSearchParams({
-        method: "suggestLink",
-        title,
-        url
-      });
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
 
-      const res = await fetch(API_URL, {
-        method: "POST",
-        body: params,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
-      });
+    document.getElementById("suggestForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-      const result = await res.text();
+      const title = document.getElementById("linkTitle").value.trim();
+      const url = document.getElementById("linkUrl").value.trim();
+      const responseEl = document.getElementById("response");
 
-      if (result === "OK") {
-        responseEl.textContent = "✅ Your link has been submitted for approval!";
-        form.reset();
-      } else {
-        responseEl.textContent = "❌ Failed to submit link.";
+      if (!title || !url) {
+        responseEl.textContent = "❌ Please fill in all fields.";
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      responseEl.textContent = "❌ An error occurred.";
-    }
-  });
-</script>
+
+      responseEl.textContent = "⏳ Submitting...";
+
+      try {
+        const formData = new URLSearchParams({
+          method: "suggestLink",
+          title,
+          url
+        });
+
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          }
+        });
+
+        const result = await res.text();
+
+        if (result === "OK") {
+          responseEl.textContent = "✅ Your link has been submitted for approval!";
+          document.getElementById("suggestForm").reset();
+        } else {
+          responseEl.textContent = "❌ Failed to submit link. (" + result + ")";
+        }
+      } catch (err) {
+        console.error(err);
+        responseEl.textContent = "❌ Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
