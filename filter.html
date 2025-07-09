@@ -2,94 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Filter PDFs - FreeBookHub</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📂 Filter Books - FreeBookHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script defer src="filter.js"></script>
 </head>
-<body class="bg-gray-50 text-gray-900 p-6 max-w-6xl mx-auto">
+<body class="bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white transition-colors">
 
-  <h1 class="text-2xl font-bold mb-4">🔍 Filter & Sort Books</h1>
+  <main class="p-6 max-w-6xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">📚 Filter Uploaded PDFs</h1>
 
-  <div class="grid md:grid-cols-2 gap-4 mb-6">
-    <input type="text" id="searchTitle" placeholder="Search by Title..." class="p-2 border rounded w-full">
-    <input type="text" id="searchFolder" placeholder="Search by Folder..." class="p-2 border rounded w-full">
+    <div class="grid md:grid-cols-4 gap-4 mb-6">
+      <input type="text" id="filterName" placeholder="🔍 Search by name..." class="p-2 border rounded w-full">
+      <input type="text" id="filterFolder" placeholder="📁 Filter by folder..." class="p-2 border rounded w-full">
+      <select id="sortBy" class="p-2 border rounded w-full">
+        <option value="">Sort by</option>
+        <option value="name">📄 Name (A-Z)</option>
+        <option value="size">📏 Size (smallest first)</option>
+        <option value="date">📅 Date (newest first)</option>
+      </select>
+      <button onclick="applyFilters()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Apply</button>
+    </div>
 
-    <select id="sortOption" class="p-2 border rounded w-full">
-      <option value="">-- Sort By --</option>
-      <option value="date_desc">📅 Newest First</option>
-      <option value="date_asc">📅 Oldest First</option>
-      <option value="size_asc">📐 Size: Smallest First</option>
-      <option value="size_desc">📐 Size: Largest First</option>
-      <option value="title_asc">🔤 Title A-Z</option>
-      <option value="title_desc">🔤 Title Z-A</option>
-    </select>
-    <button onclick="applyFilters()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Apply</button>
-  </div>
+    <div id="filteredList" class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"></div>
 
-  <div id="filteredList" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
-    let books = [];
-
-    async function fetchBooks() {
-      const res = await fetch(API_URL);
-      books = await res.json();
-      applyFilters(); // initial
-    }
-
-    function applyFilters() {
-      const search = document.getElementById("searchTitle").value.toLowerCase();
-      const folder = document.getElementById("searchFolder").value.toLowerCase();
-      const sort = document.getElementById("sortOption").value;
-
-      let filtered = books.filter(b =>
-        b.title.toLowerCase().includes(search) &&
-        b.folder.toLowerCase().includes(folder)
-      );
-
-      if (sort === "date_desc") {
-        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-      } else if (sort === "date_asc") {
-        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
-      } else if (sort === "size_asc") {
-        filtered.sort((a, b) => parseFloat(a.size) - parseFloat(b.size));
-      } else if (sort === "size_desc") {
-        filtered.sort((a, b) => parseFloat(b.size) - parseFloat(a.size));
-      } else if (sort === "title_asc") {
-        filtered.sort((a, b) => a.title.localeCompare(b.title));
-      } else if (sort === "title_desc") {
-        filtered.sort((a, b) => b.title.localeCompare(a.title));
-      }
-
-      displayBooks(filtered);
-    }
-
-    function displayBooks(list) {
-      const container = document.getElementById("filteredList");
-      container.innerHTML = "";
-
-      if (list.length === 0) {
-        container.innerHTML = "<p>No matching books found.</p>";
-        return;
-      }
-
-      list.forEach(book => {
-        const div = document.createElement("div");
-        div.className = "bg-white p-4 rounded shadow border";
-        div.innerHTML = `
-          <h3 class="text-lg font-semibold mb-1">${book.title}</h3>
-          <p>📁 Folder: ${book.folder || "None"}</p>
-          <p>📐 Size: ${book.size} MB</p>
-          <p>📅 ${new Date(book.date).toLocaleString()}</p>
-          <a href="${book.link}" target="_blank" class="text-blue-600 underline mt-2 inline-block">📥 Download</a>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    fetchBooks();
-  </script>
+    <div class="mt-6">
+      <a href="index.html" class="text-blue-600 hover:underline">⬅️ Back to Home</a>
+    </div>
+  </main>
 
 </body>
 </html>
