@@ -5,6 +5,7 @@ window.onload = () => {
   loadBooks();
   loadLinks();
   updateVisitCount();
+  setupDarkMode(); // 👈 initialize dark mode toggle
 };
 
 async function loadBooks() {
@@ -105,4 +106,23 @@ async function updateVisitCount() {
     el.textContent = "👁 Visits: Unknown";
     console.error("Visit count error:", err);
   }
+}
+
+// 🌙 Dark Mode Toggle Support
+function setupDarkMode() {
+  const toggle = document.getElementById("darkToggle");
+  const body = document.body;
+  const circle = document.getElementById("toggleCircle");
+
+  if (!toggle || !circle) return; // Don't run if toggle elements are missing
+
+  toggle.addEventListener("change", () => {
+    if (toggle.checked) {
+      body.classList.add("bg-gray-900", "text-white");
+      circle.classList.add("translate-x-5");
+    } else {
+      body.classList.remove("bg-gray-900", "text-white");
+      circle.classList.remove("translate-x-5");
+    }
+  });
 }
