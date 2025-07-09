@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Panel - FreeBookHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-white text-gray-900 p-6 max-w-3xl mx-auto">
+
+  <h1 class="text-2xl font-bold mb-4">🔐 Admin Panel - Approve Links</h1>
+
+  <div class="mb-4">
+    <label class="block text-sm mb-1">Enter Admin Password:</label>
+    <input type="password" id="adminPass" class="w-full p-2 border rounded" placeholder="Pawan123@" />
+    <button onclick="loadSuggestions()" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Load Suggestions</button>
+  </div>
+
+  <div id="suggestedLinks" class="space-y-4"></div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwxnhm-fxAKRmLk825VdEjm6bD_UBw6AO-XnlXsRTaw-QsrgxAzjIv7SjUdNPd3F7yc1Q/exec";
+
+    async function loadSuggestions() {
+      const token = document.getElementById("adminPass").value.trim();
+      if (!token) return alert("Enter password.");
+
+      const res = await fetch(`${API_URL}?method=getSuggestions&token=${encodeURIComponent(token)}`);
+      const data = await res.text();
+
+      try {
+        const links = JSON.parse(data);
+        const container = document.getElementById("suggestedLinks");
+        container.innerHTML = "";
+
+        if (links.length === 0) {
+          container.innerHTML = "<p>No pending suggestions.</p>";
+          return;
+        }
+
+        links.forEach(link => {
+          const div = document.createElement("div");
+          div.className = "border p-3 rounded shadow";
+          div.innerHTML = `
+            <strong>${link.title}</strong><br>
+            <a href="${link.url}" target="_blank" class="text-blue-600 underline">${link.url}</a><br>
+            <button onclick="approveLink('${link.title}', '${link.url}', '${token}')" class="mt-2 bg-green-600 text-white px-3 py-1 rounded">✅ Approve</button>
+            <button onclick="deleteLink('${link.title}', '${link.url}', '${token}')" class="mt-2 ml-2 bg-red-600 text-white px-3 py-1 rounded">🗑 Delete</button>
+          `;
+          container.appendChild(div);
+        });
+      } catch {
+        alert("❌ Invalid token or error loading links.");
+      }
+    }
+
+    async function approveLink(title, url, token) {
+      const res = await fetch(`${API_URL}?method=approveLink&token=${encodeURIComponent(token)}&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`);
+      const result = await res.text();
+      alert(result === "OK" ? "✅ Link approved!" : "❌ Failed to approve.");
+      loadSuggestions();
+    }
+
+    async function deleteLink(title, url, token) {
+      const res = await fetch(`${API_URL}?method=deleteSuggestedLink&token=${encodeURIComponent(token)}&title=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`);
+      const result = await res.text();
+      alert(result === "OK" ? "🗑 Link deleted." : "❌ Failed to delete.");
+      loadSuggestions();
+    }
+  </script>
+
+</body>
+</html>
